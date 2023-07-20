@@ -1,3 +1,1 @@
-# ExportReport
-
-### Se uso net6.0
+# ExportReport (net6.0)
