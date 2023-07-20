@@ -1,0 +1,80 @@
+{
+  "nombreArchivo": "pruebaExportacionPDF",
+  "tituloReporte": "PDF REPORTE",
+  "vcc": "PRIMAXPE",
+  "fechaGeneracion": "10-10-2023",
+  "periodo": "10-10-2023 hasta 10-11-2023",
+  "TamañoPagina": "A3-horizontal",
+  "MargenIzquierdo": 20,
+  "MargenDerecho": 20,
+  "MargenSuperior": 30,
+  "MargenInferior": 30,
+  "FuenteTitulo": "Helvetica-Bold",
+  "FuenteCeldasEncabezado": "Helvetica-Bold",
+  "FuenteCeldasContenido": "Helvetica",
+  "TamañoLetraTitulo": 20,
+  "TamañoLetraCeldasEncabezado": 10,
+  "TamañoLetraCeldasContenido": 10,
+  "datosTabla": [
+    {
+      "nameEncabezado": "Agente",
+      "DatosColumna": [
+        "arodrigue",
+        "juan",
+        "rodrigo",
+        "ramirez",
+        "aldolfo"
+      ]
+    },
+    {
+      "nameEncabezado": "hora1",
+      "DatosColumna": [
+        "00:00:10",
+        "00:10:10",
+        "00:02:10",
+        "00:30:10",
+        "01:00:10"
+      ]
+    },
+    {
+      "nameEncabezado": "hora2",
+      "DatosColumna": [
+        "01:10:10",
+        "02:30:10",
+        "02:04:10",
+        "04:05:10",
+        "02:33:10"
+      ]
+    },
+    {
+      "nameEncabezado": "hora3",
+      "DatosColumna": [
+        "05:05:10",
+        "00:50:10",
+        "07:11:10",
+        "00:06:06",
+        "01:06:10"
+      ]
+    },
+    {
+      "nameEncabezado": "porcentaje1",
+      "DatosColumna": [
+        "10%",
+        "21%",
+        "14%",
+        "32%",
+        "43%"
+      ]
+    },
+    {
+      "nameEncabezado": "porcentaje2",
+      "DatosColumna": [
+        "1%",
+        "0.1%",
+        "32%",
+        "43%",
+        "54%"
+      ]
+    }
+  ]
+}
