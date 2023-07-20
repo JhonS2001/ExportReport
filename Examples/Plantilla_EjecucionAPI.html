@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <title>Reporte</title>
+    <table id="dataTable">
+        <tr>
+            <th>Agente</th>
+            <th>hora1</th>
+            <th>hora2</th>
+            <th>hora3</th>
+            <th>porcentaje1</th>
+            <th>porcentaje2</th>
+        </tr>
+        <tr>
+            <td>arodrigue</td>
+            <td>00:00:10</td>
+            <td>01:10:10</td>
+            <td>05:05:10</td>
+            <td>10%</td>
+            <td>1%</td>
+        </tr>
+        <tr>
+            <td>juan</td>
+            <td>00:10:10</td>
+            <td>02:30:10</td>
+            <td>00:50:10</td>
+            <td>21%</td>
+            <td>0.1%</td>
+        </tr>
+        <tr>
+            <td>rodrigo</td>
+            <td>00:02:10</td>
+            <td>02:04:10</td>
+            <td>07:11:10</td>
+            <td>14%</td>
+            <td>32%</td>
+        </tr>
+        <tr>
+            <td>ramirez</td>
+            <td>00:30:10</td>
+            <td>04:05:10</td>
+            <td>00:06:06</td>
+            <td>32%</td>
+            <td>43%</td>
+        </tr>
+        <tr>
+            <td>aldolfo</td>
+            <td>01:00:10</td>
+            <td>02:33:10</td>
+            <td>01:06:10</td>
+            <td>43%</td>
+            <td>54%</td>
+        </tr>
+    </table>
+    <button onclick="exportarPDF()">Exportar en PDF</button>
+
+    <script>
+
+        var url = 'https://localhost:7145/api/Pdf';
+        var idTable = 'dataTable';
+
+        //Datos de para la creación del pdf
+        var nameArchivo = 'pruebaExportacionPDF';
+        var titleRpte = 'PDF REPORTE';
+        var vcc = 'VCC_name'
+        var fechaGeneracion = '10-10-2023'; //Fecha en la cual se creo el reporte
+        var periodo = '10-10-2023 - 10-11-2023' //Periodo (Fecha Inicio - Fecha Fin)
+        var pageSize = 'A3-horizontal' //Opciones -> (A1-horizontal, A2-horizontal, A3-horizontal, A4-horizontal, A5-horizontal, letter-horizontal, tabloid-horizontal
+        //                                            A1-vertical, A2-vertical, A3-vertical, A4-vertical, A5-vertical, letter-vertical, tabloid-vertical)
+
+        function exportarPDF() {
+            const tableData = [];
+            const tableHeaders = [];
+
+            // Get table headers
+            const headers = document.querySelectorAll('#'+ idTable +' th');
+            headers.forEach(header => tableHeaders.push(header.innerText));
+
+            // Get table rows
+            const rows = document.querySelectorAll('#' + idTable +' tr');
+            rows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => rowData.push(cell.innerText));
+                tableData.push(rowData);
+            });
+
+            // Create the JSON object for the API request
+            const data = {
+                "nombreArchivo": nameArchivo,
+                "tituloReporte": titleRpte,
+                "vcc": vcc,
+                "fechaGeneracion": fechaGeneracion,
+                "periodo": periodo,
+                "TamañoPagina": pageSize,
+                "MargenIzquierdo": 20,
+                "MargenDerecho": 20,
+                "MargenSuperior": 30,
+                "MargenInferior": 30,
+                "FuenteTitulo": "Helvetica-Bold",
+                "FuenteCeldasEncabezado": "Helvetica-Bold",
+                "FuenteCeldasContenido": "Helvetica",
+                "TamañoLetraTitulo": 20,
+                "TamañoLetraCeldasEncabezado": 10,
+                "TamañoLetraCeldasContenido": 10,
+                "datosTabla": []
+            };
+
+            // Create the JSON array for the "datosTabla" property
+            for (let i = 1; i < tableHeaders.length; i++) {
+                data.datosTabla.push({
+                    "nameEncabezado": tableHeaders[i],
+                    "DatosColumna": tableData.map(row => row[i])
+                });
+            }
+
+            console.log("Data", JSON.stringify(data));
+
+            // Send the POST request to the API
+            fetch( url , {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/pdf',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la solicitud: ' + response.status + ' ' + response.statusText);
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Convert the blob to a downloadable PDF
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = nameArchivo;
+                    a.click();
+                    console.log('PDF exportado correctamente.');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    console.log('No se pudo exportar el PDF.');
+                });
+        }
+    </script>
+</body>
+
+</html>

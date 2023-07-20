@@ -1,12 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
+using ExportReport.Models;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.IO;
-using ExportReport.Models;
-using System.Reflection.Metadata;
-using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 using Document = iTextSharp.text.Document;
 
 [Route("api/[controller]")]
