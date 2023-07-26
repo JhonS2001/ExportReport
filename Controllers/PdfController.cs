@@ -146,7 +146,12 @@ public class PdfController : ControllerBase
             // Descarga el PDF como un archivo.
             byte[] bytes = memoryStream.ToArray();
             memoryStream.Close();
-            return File(bytes, "application/pdf", nombreArchivo + ".pdf");
+            
+            // Convierte el arreglo de bytes a Base64.
+            string base64String = Convert.ToBase64String(bytes);
+
+            // Retorna el resultado en Base64.
+            return Ok(new { Base64Content = base64String });
         }
         catch (Exception ex)
         {

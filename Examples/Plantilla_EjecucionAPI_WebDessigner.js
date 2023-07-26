@@ -1,17 +1,36 @@
-﻿var DateInicio = ''
-var DateFin = ''
+﻿/********************************************************************
+			Declarción de Variables Globales 
+********************************************************************/
 
-var Date_Init = '';
-var Date_End = '';
-
+var Date_Init = '';//Setear este dato en el código del formulario
+var Date_End = '';//Setear este dato en el código del formulario
 
 var vVirtualCC = icc.ui.getApplication().getVCCName();
 //Fecha de generación del Reporte
 var FechaGeneracion = '';
 
+//Datos para el reporte
+//Url del API para exportar la tabla del reporte en pdf
+var urlExportPDF = 'http://IP_MW:PUERTO/api/Pdf'
+//Nombre del Reporte
+var nameReport = 'pruebaExportacionPDF'
+//Titulo del reporte
+var titleReport = 'PDF REPORTE'
+
 var pageSize = 'A3-horizontal' //Opciones -> (A1-horizontal, A2-horizontal, A3-horizontal, A4-horizontal, A5-horizontal, letter-horizontal, tabloid-horizontal
         //                                            A1-vertical, A2-vertical, A3-vertical, A4-vertical, A5-vertical, letter-vertical, tabloid-vertical)
 
+
+/*
+
+Aquí va el código del formulario
+
+*/
+
+
+/********************************************************************
+					Declarción de Funciones
+********************************************************************/
 
 //Obtiene la fecha y hora actual (YYYY-MM-DD HH:MM:SS)
 function getFormattedDateTime() {
@@ -48,12 +67,12 @@ function exportarPDF() {
 	});
 
 	// Create the JSON object for the API request
-	const data = {
+	const request = {
 		"nombreArchivo": nameReport,
 		"tituloReporte": titleReport,
 		"vcc": vVirtualCC,
 		"fechaGeneracion": getFormattedDateTime(),
-		"periodo": Date_Init + "00:00:00  -  " + Date_End + "23:59:59",
+		"periodo": Date_Init + " 00:00:00  -  " + Date_End + " 23:59:59",
 		"TamañoPagina": pageSize,
 		"MargenIzquierdo": 20,
 		"MargenDerecho": 20,
@@ -70,40 +89,72 @@ function exportarPDF() {
 
 	// Crear el array JSON para la propiedad "datosTabla"
 	for (let i = 0; i < tableHeaders.length; i++) {
-		data.datosTabla.push({
+		request.datosTabla.push({
 			"nameEncabezado": tableHeaders[i],
 			"DatosColumna": tableData.map(row => row[i])
 		});
 	}
 
-	console.log("Data", JSON.stringify(data));
+	console.log("Data", JSON.stringify(request));
 
-	// Send the POST request to the API
-	fetch(urlExportPDF, {
-		method: 'POST',
-		headers: {
-			'Accept': 'application/pdf',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(data)
-	})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('Error en la solicitud: ' + response.status + ' ' + response.statusText);
+	const blob = new Blob([JSON.stringify(result)], { type: 'application/pdf' });
+
+
+	try {
+
+		icc.ui.getApplication().ajaxCall('POST', "json", urlExportPDF, JSON.stringify(request), {
+			"Content-Type": "application/json"
+		}, {}, function callback(status, result) {
+			if (status) {
+				// Convertir el contenido en Base64 y descargar el PDF
+				downloadPDF(result.base64Content, nameReport + 'pdf');
+				console.log('PDF exportado correctamente.');
+				icc.ui.displayMessage('PDF exportado correctamente.');
+				//console.log('result: ', result.base64Content);
+			} else {
+				console.error('Error en la solicitud: ' + status);
+				console.log('No se pudo exportar el PDF.');
+				icc.ui.displayMessage('No se pudo exportar el PDF.');
+				icc.ui.displayMessage('STATUS: ' + status);
+				console.log('result: ', result);
+				return false;
 			}
-			return response.blob();
-		})
-		.then(blob => {
-			// Convert the blob to a downloadable PDF
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = 'pruebaExportacionPDF.pdf';
-			a.click();
-			console.log('PDF exportado correctamente.');
-		})
-		.catch(error => {
-			console.error('Error:', error);
-			console.log('No se pudo exportar el PDF.');
 		});
+	} catch (e) {
+		console.error('Error:', e);
+		icc.ui.displayMessage('No se pudo exportar el PDF.');
+		return false;
+	}
+}
+
+//Función para convertir de base64 a PDF y descargarlo
+function downloadPDF(base64Content, fileName) {
+	// Decodificar el contenido Base64
+	const byteCharacters = atob(base64Content);
+
+	// Convertir el contenido en un array de bytes
+	const byteNumbers = new Array(byteCharacters.length);
+	for (let i = 0; i < byteCharacters.length; i++) {
+		byteNumbers[i] = byteCharacters.charCodeAt(i);
+	}
+	const byteArray = new Uint8Array(byteNumbers);
+
+	// Crear el Blob con el contenido y el tipo de archivo PDF
+	const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+
+	// Crear un objeto URL para el Blob
+	const pdfURL = URL.createObjectURL(pdfBlob);
+
+	// Crear un enlace para descargar el archivo
+	const a = document.createElement('a');
+	a.href = pdfURL;
+	a.download = fileName;
+	a.style.display = 'none';
+
+	// Agregar el enlace al documento y simular un clic para descargar el archivo
+	document.body.appendChild(a);
+	a.click();
+
+	// Liberar el objeto URL
+	URL.revokeObjectURL(pdfURL);
 }
